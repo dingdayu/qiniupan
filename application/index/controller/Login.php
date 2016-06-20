@@ -25,8 +25,8 @@ class Login extends Controller
     }
     public function index()
     {
-        if(session('?uid')) {
-            return $this->redirect('Index/index');
+        if(!empty(session('uid'))) {
+            return $this->redirect('user/Index/index');
         }
 
         $template = [];
@@ -42,11 +42,11 @@ class Login extends Controller
         if($remember == "true") {
             $sessionName = ini_get('session.name');
             $sessionId = session_id();
-            setcookie($sessionName, $sessionId, time() + 3156000);
-            $data = ['code' => 200, 'msg' => 'sucess','url' => url('Index/index')];
+            setcookie($sessionName, $sessionId, time() + 3156000, '/');
+            $data = ['code' => 200, 'msg' => 'sucess','url' => url('user/Index/index')];
             return json($data);
         }
-        $data = ['code' => 300, 'msg' => 'erro','url' => url('Index/index')];
+        $data = ['code' => 300, 'msg' => 'erro','url' => url('user/Index/index')];
         return json($data);
     }
 
