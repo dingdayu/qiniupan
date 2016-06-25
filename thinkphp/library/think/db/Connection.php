@@ -16,11 +16,11 @@ use PDOStatement;
 use think\App;
 use think\Collection;
 use think\Db;
+use think\db\exception\BindParamException;
 use think\db\Query;
 use think\Debug;
 use think\Exception;
 use think\exception\PDOException;
-use think\db\exception\BindParamException;
 use think\Log;
 
 abstract class Connection
@@ -102,7 +102,7 @@ abstract class Connection
 
     // PDO连接参数
     protected $params = [
-        PDO::ATTR_CASE              => PDO::CASE_LOWER,
+        PDO::ATTR_CASE              => PDO::CASE_NATURAL,
         PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_ORACLE_NULLS      => PDO::NULL_NATURAL,
         PDO::ATTR_STRINGIFY_FETCHES => false,
@@ -138,8 +138,8 @@ abstract class Connection
     /**
      * 调用Query类的查询方法
      * @access public
-     * @param string $method 方法名称
-     * @param array $args 调用参数
+     * @param string    $method 方法名称
+     * @param array     $args 调用参数
      * @return mixed
      */
     public function __call($method, $args)
@@ -188,7 +188,7 @@ abstract class Connection
      * @param array $info 字段信息
      * @return array
      */
-    protected function fieldCase($info)
+    public function fieldCase($info)
     {
         // 字段大小写转换
         switch ($this->attrCase) {
@@ -219,8 +219,8 @@ abstract class Connection
     /**
      * 设置数据库的配置参数
      * @access public
-     * @param string $config 配置名称
-     * @param mixed $value 配置值
+     * @param string    $config 配置名称
+     * @param mixed     $value 配置值
      * @return void
      */
     public function setConfig($config, $value)
@@ -231,9 +231,9 @@ abstract class Connection
     /**
      * 连接数据库方法
      * @access public
-     * @param array $config 连接参数
-     * @param integer $linkNum 连接序号
-     * @param array|bool $autoConnection 是否自动连接主数据库（用于分布式）
+     * @param array         $config 连接参数
+     * @param integer       $linkNum 连接序号
+     * @param array|bool    $autoConnection 是否自动连接主数据库（用于分布式）
      * @return PDO
      * @throws Exception
      */
@@ -314,10 +314,10 @@ abstract class Connection
     /**
      * 执行查询 返回数据集
      * @access public
-     * @param string $sql sql指令
-     * @param array $bind 参数绑定
-     * @param boolean $master 是否在主服务器读操作
-     * @param bool|string $class 指定返回的数据集对象
+     * @param string        $sql sql指令
+     * @param array         $bind 参数绑定
+     * @param boolean       $master 是否在主服务器读操作
+     * @param bool|string   $class 指定返回的数据集对象
      * @return mixed
      * @throws BindParamException
      * @throws PDOException
@@ -330,7 +330,7 @@ abstract class Connection
         }
         // 根据参数绑定组装最终的SQL语句
         $this->queryStr = $this->getRealSql($sql, $bind);
-        
+
         //释放前次的查询结果
         if (!empty($this->PDOStatement)) {
             $this->free();
@@ -358,10 +358,10 @@ abstract class Connection
     /**
      * 执行语句
      * @access public
-     * @param string $sql sql指令
-     * @param array $bind 参数绑定
-     * @param boolean $getLastInsID 是否获取自增ID
-     * @param string $sequence 自增序列名
+     * @param string        $sql sql指令
+     * @param array         $bind 参数绑定
+     * @param boolean       $getLastInsID 是否获取自增ID
+     * @param string        $sequence 自增序列名
      * @return int
      * @throws BindParamException
      * @throws PDOException
@@ -409,8 +409,8 @@ abstract class Connection
     /**
      * 根据参数绑定组装最终的SQL语句 便于调试
      * @access public
-     * @param string $sql 带参数绑定的sql语句
-     * @param array $bind 参数绑定列表
+     * @param string    $sql 带参数绑定的sql语句
+     * @param array     $bind 参数绑定列表
      * @return string
      */
     public function getRealSql($sql, array $bind = [])
@@ -463,8 +463,8 @@ abstract class Connection
     /**
      * 获得数据集
      * @access protected
-     * @param bool|string $class true 返回PDOStatement 字符串用于指定返回的类名
-     * @param bool $procedure 是否存储过程
+     * @param bool|string   $class true 返回PDOStatement 字符串用于指定返回的类名
+     * @param bool          $procedure 是否存储过程
      * @return mixed
      */
     protected function getResult($class = '', $procedure = false)
@@ -474,6 +474,7 @@ abstract class Connection
             return $this->PDOStatement;
         }
         if ($procedure) {
+            // 存储过程返回结果
             return $this->procedure($class);
         }
         $result        = $this->PDOStatement->fetchAll($this->fetchType);
@@ -482,11 +483,10 @@ abstract class Connection
         if (!empty($class)) {
             // 返回指定数据集对象类
             $result = new $class($result);
-        } elseif ('collection' == $this->resultSetType){
+        } elseif ('collection' == $this->resultSetType) {
             // 返回数据集Collection对象
             $result = new Collection($result);
         }
-
         return $result;
     }
 
@@ -551,7 +551,7 @@ abstract class Connection
 
         ++$this->transTimes;
 
-        if ($this->transTimes == 1) {
+        if (1 == $this->transTimes) {
             $this->linkID->beginTransaction();
         } elseif ($this->transTimes > 1 && $this->supportSavepoint()) {
             $this->linkID->exec(
@@ -570,7 +570,7 @@ abstract class Connection
     {
         $this->initConnect(true);
 
-        if ($this->transTimes == 1) {
+        if (1 == $this->transTimes) {
             $this->linkID->commit();
         }
 
@@ -587,7 +587,7 @@ abstract class Connection
     {
         $this->initConnect(true);
 
-        if ($this->transTimes == 1) {
+        if (1 == $this->transTimes) {
             $this->linkID->rollBack();
         } elseif ($this->transTimes > 1 && $this->supportSavepoint()) {
             $this->linkID->exec(
@@ -647,9 +647,9 @@ abstract class Connection
             }
             // 提交事务
             $this->commit();
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             $this->rollback();
-            return false;
+            throw $e;
         }
         return true;
     }
@@ -777,9 +777,9 @@ abstract class Connection
     /**
      * 触发SQL事件
      * @access protected
-     * @param string $sql SQL语句
-     * @param float $runtime SQL运行时间
-     * @param mixed $explain SQL分析
+     * @param string    $sql SQL语句
+     * @param float     $runtime SQL运行时间
+     * @param mixed     $explain SQL分析
      * @return bool
      */
     protected function trigger($sql, $runtime, $explain = [])

@@ -17,7 +17,8 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "topthink/framework": "*"
+        "topthink/framework": "*",
+        "qiniu/php-sdk": "^7.0"
     },
     "extra": {
         "think-path": "thinkphp"
