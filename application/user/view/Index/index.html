@@ -78,7 +78,7 @@
 
         <div class="admin-content-body">
             <div class="am-cf am-padding am-padding-bottom-0">
-                <div class="am-fl am-cf">
+                <div class="am-fl am-cf" id="dir">
                     <strong class="am-text-primary am-text-lg">相册</strong> / <small>Gallery</small>
                 </div>
             </div>
@@ -138,6 +138,7 @@
         $.get("{:url('User/Index/lists')}?prefix="+prefix,function(data,status){
             if(data.code = 200){
                 initView(data.data);
+                initDir(data.dir);
             }
         },'json');
     }
@@ -153,6 +154,18 @@
             html += '/><div class="gallery-title">'+ data[item].fileName+'</div><div class="gallery-desc">'+ data[item].putTime+'</div></a></li>';
         }
         $('.gallery-list').html(html);
+    }
+
+    function initDir(dir){
+        if('' == dir){
+            $('#dir strong').text('首页');
+            $('#dir small').text('/');
+        } else {
+            var dir_arr = dir.split('/');
+            $('#dir strong').text(dir_arr[dir_arr.length - 2]);
+            $('#dir small').text(dir);
+        }
+
     }
 </script>
 </body>
