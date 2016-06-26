@@ -98,62 +98,6 @@
             <hr>
 
             <ul class="am-avg-sm-2 am-avg-md-4 am-avg-lg-6 am-margin gallery-list">
-                <li>
-                    <a href="#">
-                        <img class="am-img-thumbnail am-img-bdrs" src="/static/images/ext/mp3.png" alt=""/>
-                        <div class="gallery-title">远方 有一个地方 那里种有我们的梦想</div>
-                        <div class="gallery-desc">2375-09-26</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <img class="am-img-thumbnail am-img-bdrs" src="/static/images/ext/mp3.png" alt=""/>
-                        <div class="gallery-title">君可见漫天落霞</div>
-                        <div class="gallery-desc">2375-09-26</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <img class="am-img-thumbnail am-img-bdrs" src="http://s.amazeui.org/media/i/demos/bing-3.jpg" alt=""/>
-                        <div class="gallery-title">此刻鲜花满天幸福在身边</div>
-                        <div class="gallery-desc">2375-09-26</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <img class="am-img-thumbnail am-img-bdrs" src="http://s.amazeui.org/media/i/demos/bing-4.jpg" alt=""/>
-                        <div class="gallery-title">你当我是浮夸吧</div>
-                        <div class="gallery-desc">2375-09-26</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <img class="am-img-thumbnail am-img-bdrs" src="http://s.amazeui.org/media/i/demos/bing-4.jpg" alt=""/>
-                        <div class="gallery-title">远方 有一个地方 那里种有我们的梦想</div>
-                        <div class="gallery-desc">2375-09-26</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <img class="am-img-thumbnail am-img-bdrs" src="http://s.amazeui.org/media/i/demos/bing-1.jpg" alt=""/>
-                        <div class="gallery-title">斜阳染幽草 几度飞红</div>
-                        <div class="gallery-desc">2375-09-26</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <img class="am-img-thumbnail am-img-bdrs" src="http://s.amazeui.org/media/i/demos/bing-1.jpg" alt=""/>
-                        <div class="gallery-title">远方 有一个地方 那里种有我们的梦想</div>
-                        <div class="gallery-desc">2375-09-26</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" >
-                        <img class="am-img-thumbnail am-img-bdrs" src="http://s.amazeui.org/media/i/demos/bing-3.jpg" alt=""/>
-                        <div class="gallery-title">你当我是浮夸吧</div>
-                        <div class="gallery-desc">2375-09-26</div>
-                    </a>
-                </li>
             </ul>
 
             <div class="am-margin am-cf am-hide">
@@ -202,7 +146,7 @@
         getFiles('');
     });
 
-        function getFiles(prefix){
+    function getFiles(prefix){
         $.get("{:url('User/Index/lists')}?prefix="+prefix,function(data,status){
             if(data.code = 200){
                 initView(data.data);
@@ -218,17 +162,10 @@
             if(data[item].mimeType == 'directory'){
                 html += 'onclick="getFiles(\''+ data[item].key +'\')"';
             }
-            html += '/><div class="gallery-title">'+ data[item].key+'</div><div class="gallery-desc">'+ data[item].putTime+'</div></a></li>';
+            html += '/><div class="gallery-title">'+ data[item].fileName+'</div><div class="gallery-desc">'+ data[item].putTime+'</div></a></li>';
         }
         $('.gallery-list').html(html);
     }
-
-//    $(".gallery-list li").click(function () {
-//
-//        var prefix = $(this).data("key");
-//        console.log(prefix);
-//        getFiles(prefix);
-//    });
 </script>
 </body>
 </html>
