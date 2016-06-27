@@ -162,9 +162,14 @@
             $('#dir small').text('/');
         } else {
             var dir_arr = dir.split('/');
-            $('#dir strong').text(dir_arr[dir_arr.length - 2]);
-            $('#dir small').text(dir);
+            $('#dir strong').text(dir_arr[dir_arr.length - 1]);
+//            $('#dir small').text(dir_arr[dir_arr.length - 2]);
+            $('#dir small').text('');
+            for (i=0;i<dir_arr.length;i++){
+                $('#dir small').append(dir_arr[i] + '/');
+            }
         }
+
 
     }
 </script>
