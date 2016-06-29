@@ -131,11 +131,11 @@
 <script type="application/javascript">
 
     $(function(){
-        getFiles('');
+        getFiles('/');
     });
 
-    function getFiles(prefix){
-        $.get("{:url('User/Index/lists')}?prefix="+prefix,function(data,status){
+    function getFiles(dir){
+        $.get("{:url('User/Index/lists')}?dir="+dir,function(data,status){
             if(data.code = 200){
                 initView(data.data);
                 initDir(data.dir);
@@ -147,11 +147,11 @@
         var html = '';
         for(var item in data) {
             console.log(data[item]);
-            html += '<li><a href="#"><img class="am-img-thumbnail am-img-bdrs" src="'+ data[item].icon +'" alt="" data-key="'+data[item].key +'"';
+            html += '<li><a href="#"><img class="am-img-thumbnail am-img-bdrs" src="'+ data[item].icon +'" alt="" data-key="'+data[item].name +'"';
             if(data[item].mimeType == 'directory'){
-                html += 'onclick="getFiles(\''+ data[item].key +'\')"';
+                html += 'onclick="getFiles(\''+ data[item].name +'\')"';
             }
-            html += '/><div class="gallery-title">'+ data[item].fileName+'</div><div class="gallery-desc">'+ data[item].putTime+'</div></a></li>';
+            html += '/><div class="gallery-title">'+ data[item].name+'</div><div class="gallery-desc">'+ data[item].last_time+'</div></a></li>';
         }
         $('.gallery-list').html(html);
     }
