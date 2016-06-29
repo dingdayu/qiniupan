@@ -14,54 +14,37 @@ class Index extends Common
         return view('',$template);
     }
 
-    public function lists($prefix = '', $limit = 10)
+    public function lists($dir = '/', $limit = 10)
     {
-        $prefix = trim($prefix);
+        $dir = trim($dir);
         $limit = intval($limit);
-        $accessKey = 'ScLfBuX6OeDNb0lVvk5qrCbgEjneoDpgvR9GfAun';
-        $secretKey = 'lcfLxYhNBi2wrbctTCtv4l46m77kLUgVAlcjWGbo';
-        $auth = new Auth($accessKey, $secretKey);
-        $bucketMgr = new BucketManager($auth);
 
-        // 要列取的空间名称
-        $bucket = 'qzonebackgroundmusic';
-
-        $marker = '';
-
-        $file_list = [];
-
-        list($iterms, $marker, $err) = $bucketMgr->listFiles($bucket, $prefix, $marker, $limit);
-        if ($err !== null) {
-            return json(['code' => 200,'msg' => $err]);
-        } else {
-            foreach($iterms as $v => $k) {
-                if(!empty($prefix)) {
-                    $file = ltrim($k['key'],$prefix.'/');
-                } else {
-                    $file = $k['key'];
-                }
-                $file = explode('/',$file);
-                if(count($file) > 1) {
-                    if(!empty($prefix)){
-                        $prefix = $prefix.'/'.$file[0];
-                    }
-                    $file_list[$file[0]]['key'] = empty($prefix) ? $file[0] : $prefix;
-                    $file_list[$file[0]]['fileName'] = $file[0];
-                    $file_list[$file[0]]['fsize'] = (empty($file_list[$file[0]]['fsize'])) ? $file_list[$file[0]]['fsize'] = $k['fsize'] : $file_list[$file[0]]['fsize'] + $k['fsize'];
-                    $putTime = (!empty($file[$file[0]]['putTime']) && strtotime($file[$file[0]]['putTime']) > $k['putTime']) ?: $k['putTime'];
-                    $putTime = date('Y-m-d H:i:s',$putTime/10000000);
-                    $file_list[$file[0]]['putTime'] = $putTime;
-                    $file_list[$file[0]]['icon'] = '/static/images/dir2.png';
-                    $file_list[$file[0]]['mimeType'] = 'directory';
-                } else {
-                    $k['fileName'] = pathinfo($k['key'],PATHINFO_BASENAME);
-                    $file_list[$k['key']] = $k;
-                    $file_list[$k['key']]['icon'] = $this->getIcon($k['key']);
-                    $file_list[$k['key']]['putTime'] = date('Y-m-d H:i:s',$k['putTime']/10000000);
-                }
-            }
-            return json(['code' => 200, 'msg' => 'sucess','count'=>count($file_list), 'dir'=>$prefix, 'data' => $file_list]);
+        // 如果不是以斜杠开头添加一个斜杠，与下面的去除目录中的/对应
+        if(substr( $dir, 0, 1 ) != '/') {
+            $dir = '/' . $dir;
         }
+
+        // 先获得当前所在目录
+        $temp_dir_id = Db::table('tp_directory')->where('name',$dir)->value('id');
+        // 获取文件夹下所有的文件夹
+        $dirs = Db::table('tp_directory')->where('pid',$temp_dir_id)->select();
+        // 获取文件夹下所有文件
+        $files = Db::table('tp_files')->where('dir',$dir)->select();
+
+        $dirs = $this->handleDirs($dirs);
+        $files = $this->handleFiles($files);
+
+        $data = [];
+        if(!empty($dirs) && !empty($files)) {
+            $data = array_merge($dirs, $files);
+        } else {
+            $data = (empty($dirs)) ? $files : $dirs;
+            $data = (empty($data)) ? array() : $data;
+        }
+
+
+
+        return json(['code' => 200, 'msg' => 'sucess','count'=>count($data), 'dir'=>$dir, 'data' => $data]);
     }
 
     private function getIcon($file)
@@ -82,6 +65,54 @@ class Index extends Common
     {
         return pathinfo($file,PATHINFO_EXTENSION);
     }
+
+    private function handleFiles($files = array())
+    {
+        if(empty($files))
+            return null;
+
+        $temp = [];
+
+        foreach ($files as $k => $v) {
+            $temp_arr = ['name' => trim($v['name'],'/'), 'last_time' => date('Y-m-d H:i:s',$v['putTime']),
+                'mimeType' => $v['mimeType'], 'fsize' => $v['fsize']
+            ];
+            $temp_arr['icon'] = $this->getIcon($v['name']);
+            $temp[] = $temp_arr;
+        }
+        return $temp;
+    }
+
+    /**
+     * 处理从数据库中读取的文件目录列表
+     * @param array $dirs
+     * @return array
+     */
+    private function handleDirs($dirs = array())
+    {
+        if(empty($dirs))
+            return null;
+
+        $temp = [];
+
+        foreach ($dirs as $k => $v) {
+            // 去除文件目录中开头的/
+            $name = trim($v['name'],'/');
+
+            $temp_arr = ['name' => $name, 'last_time' => date('Y-m-d H:i:s',$v['last_time'])];
+            $temp_arr['icon'] = '/static/images/dir2.png';
+            $temp_arr['mimeType'] = 'directory';
+            $temp[] = $temp_arr;
+        }
+        return $temp;
+    }
+
+
+
+
+
+
+    /********************************* 定时任务 ***********************/
 
     public function crontab($prefix = '', $limit = 3)
     {
@@ -134,7 +165,7 @@ class Index extends Common
 
         defined('NOW_TIME') or define('NOW_TIME',time());
 
-        $dir = (empty($dir) || $dir == '.') ? '/' : $dir;
+        $dir = (empty($dir) || $dir == '.') ? '/' : '/'.$dir;
 
         $data = Db::table('tp_files')->where(['name' => $key, 'dir' => $dir])->find();
         if(empty($data)) {

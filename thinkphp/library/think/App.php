@@ -12,6 +12,7 @@
 namespace think;
 
 use think\Config;
+use think\debug\Trace;
 use think\Exception;
 use think\exception\HttpException;
 use think\exception\HttpResponseException;
@@ -70,7 +71,7 @@ class App
      * 执行应用程序
      * @access public
      * @param Request $request Request对象
-     * @return mixed
+     * @return Response
      * @throws Exception
      */
     public static function run(Request $request = null)
@@ -95,7 +96,7 @@ class App
             // 获取应用调度信息
             $dispatch = self::$dispatch;
             if (empty($dispatch)) {
-                // 未指定调度类型 则进行URL路由检测
+                // 进行URL路由检测
                 $dispatch = self::routeCheck($request, $config);
             }
             // 记录当前调度信息
@@ -136,22 +137,29 @@ class App
             $data = $exception->getResponse();
         }
 
-        // 监听app_end
-        Hook::listen('app_end', $data);
         // 清空类的实例化
         Loader::clearInstance();
 
         // 输出数据到客户端
         if ($data instanceof Response) {
-            return $data;
+            $response = $data;
         } elseif (!is_null($data)) {
             // 默认自动识别响应输出类型
             $isAjax = $request->isAjax();
             $type   = $isAjax ? Config::get('default_ajax_return') : Config::get('default_return_type');
-            return Response::create($data, $type);
+            $response = Response::create($data, $type);
         } else {
-            return Response::create();
+            $response = Response::create();
         }
+
+
+        // 监听app_end
+        Hook::listen('app_end', $response);
+        
+        //注入Trace
+        self::$debug && Trace::inject($response);
+
+        return $response;
     }
 
     /**
@@ -162,7 +170,7 @@ class App
      * @param array         $params 参数
      * @return void
      */
-    public static function dispatch($dispath, $type = 'module', $params = [])
+    public static function dispatch($dispatch, $type = 'module', $params = [])
     {
         self::$dispatch = ['type' => $type, $type => $dispatch, 'params' => $params];
     }
@@ -307,7 +315,9 @@ class App
 
         try {
             $instance = Loader::controller($controller, $config['url_controller_layer'], $config['controller_suffix'], $config['empty_controller']);
-
+            if (is_null($instance)) {
+                throw new HttpException(404, 'controller not exists:' . $controller);
+            }
             // 获取当前操作名
             $action = $actionName . $config['action_suffix'];
             if (!preg_match('/^[A-Za-z](\w)*$/', $action)) {
@@ -347,6 +357,15 @@ class App
             self::$debug = Config::get('app_debug');
             if (!self::$debug) {
                 ini_set('display_errors', 'Off');
+            } else {
+                //重新申请一块比较大的buffer
+                if (ob_get_level() > 0) {
+                    $output = ob_get_clean();
+                }
+                ob_start();
+                if (!empty($output)) {
+                    echo $output;
+                }
             }
 
             // 应用命名空间
@@ -468,7 +487,7 @@ class App
         }
         if (false === $result) {
             // 路由无效 解析模块/控制器/操作/参数... 支持控制器自动搜索
-            $result = Route::parseUrl($path, $depr, $config['controller_auto_search'], $config['url_param_type']);
+            $result = Route::parseUrl($path, $depr, $config['controller_auto_search']);
         }
         return $result;
     }

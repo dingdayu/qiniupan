@@ -178,16 +178,15 @@ class Query
      * @access public
      * @param string        $sql sql指令
      * @param array         $bind 参数绑定
-     * @param boolean       $fetch 不执行只是获取SQL
      * @param boolean       $master 是否在主服务器读操作
      * @param bool|string   $class 指定返回的数据集对象
      * @return mixed
      * @throws BindParamException
      * @throws PDOException
      */
-    public function query($sql, $bind = [], $fetch = false, $master = false, $class = false)
+    public function query($sql, $bind = [], $master = false, $class = false)
     {
-        return $this->connection->query($sql, $bind, $fetch, $master, $class);
+        return $this->connection->query($sql, $bind, $master, $class);
     }
 
     /**
@@ -195,16 +194,15 @@ class Query
      * @access public
      * @param string    $sql sql指令
      * @param array     $bind 参数绑定
-     * @param boolean   $fetch 不执行只是获取SQL
      * @param boolean   $getLastInsID 是否获取自增ID
      * @param boolean   $sequence 自增序列名
      * @return int
      * @throws BindParamException
      * @throws PDOException
      */
-    public function execute($sql, $bind = [], $fetch = false, $getLastInsID = false, $sequence = null)
+    public function execute($sql, $bind = [], $getLastInsID = false, $sequence = null)
     {
-        return $this->connection->execute($sql, $bind, $fetch, $getLastInsID, $sequence);
+        return $this->connection->execute($sql, $bind, $getLastInsID, $sequence);
     }
 
     /**
@@ -778,8 +776,13 @@ class Query
                         $fields[]                   = $alias . '.' . $val;
                         $this->options['map'][$val] = $alias . '.' . $val;
                     } else {
-                        $fields[]                   = $alias . '.' . $key . ' AS ' . $val;
-                        $this->options['map'][$val] = $alias . '.' . $key;
+                        if (preg_match('/[,=\.\'\"\(\s]/', $key)) {
+                            $name = $key;
+                        } else {
+                            $name = $alias . '.' . $key;
+                        }
+                        $fields[]                   = $name . ' AS ' . $val;
+                        $this->options['map'][$val] = $name;
                     }
                 }
             }
@@ -1466,7 +1469,7 @@ class Query
                         unset($this->options['with_field']);
                     }
                 }
-                $this->field($field, false, $joinTable, $joinAlias, $joinName . '__');
+                $this->field($field, false, $joinTable, $joinAlias, $relation . '__');
                 $i++;
             } elseif ($closure) {
                 $with[$key] = $closure;
@@ -1663,6 +1666,7 @@ class Query
             // 如果存在主键数据 则自动作为更新条件
             if (is_string($pk) && isset($data[$pk])) {
                 $where[$pk] = $data[$pk];
+                $key        = 'think:' . $options['table'] . '|' . $data[$pk];
                 unset($data[$pk]);
             } elseif (is_array($pk)) {
                 // 增加复合主键支持
@@ -1689,6 +1693,11 @@ class Query
             // 获取实际执行的SQL语句
             return $this->connection->getRealSql($sql, $this->bind);
         } else {
+            // 检测缓存
+            if (isset($key) && Cache::get($key)) {
+                // 删除缓存
+                Cache::rm($key);
+            }
             // 执行操作
             return '' == $sql ? 0 : $this->execute($sql, $this->getBind());
         }
@@ -1810,8 +1819,12 @@ class Query
         $result           = false;
         if (empty($options['fetch_sql']) && !empty($options['cache'])) {
             // 判断查询缓存
-            $cache  = $options['cache'];
-            $key    = is_string($cache['key']) ? $cache['key'] : md5(serialize($options));
+            $cache = $options['cache'];
+            if (true === $cache['key'] && !is_array($data)) {
+                $key = 'think:' . $options['table'] . '|' . $data;
+            } else {
+                $key = is_string($cache['key']) ? $cache['key'] : md5(serialize($options));
+            }
             $result = Cache::get($key);
         }
         if (!$result) {
@@ -1873,7 +1886,7 @@ class Query
      * @throws Exception
      * @throws PDOException
      */
-    public function selectOrFail($data = [])
+    public function selectOrFail($data = null)
     {
         return $this->failException(true)->select($data);
     }
@@ -1887,7 +1900,7 @@ class Query
      * @throws Exception
      * @throws PDOException
      */
-    public function findOrFail($data = [])
+    public function findOrFail($data = null)
     {
         return $this->failException(true)->find($data);
     }
@@ -1950,30 +1963,41 @@ class Query
     /**
      * 删除记录
      * @access public
-     * @param array $data 表达式
+     * @param mixed $data 表达式 true 表示强制删除
      * @return int
      * @throws Exception
      * @throws PDOException
      */
-    public function delete($data = [])
+    public function delete($data = null)
     {
         // 分析查询表达式
         $options = $this->parseExpress();
 
-        if (!empty($data)) {
+        if (!is_null($data) && true !== $data) {
+            if (!is_array($data)) {
+                // 缓存标识
+                $key = 'think:' . $options['table'] . '|' . $data;
+            }
             // AR模式分析主键条件
             $this->parsePkWhere($data, $options);
         }
 
-        if (empty($options['where'])) {
+        if (true !== $data && empty($options['where'])) {
             // 如果条件为空 不进行删除操作 除非设置 1=1
             throw new Exception('delete without condition');
         }
         // 生成删除SQL语句
         $sql = $this->builder()->delete($options);
+
         if ($options['fetch_sql']) {
             // 获取实际执行的SQL语句
             return $this->connection->getRealSql($sql, $this->bind);
+        }
+
+        // 检测缓存
+        if (isset($key) && Cache::get($key)) {
+            // 删除缓存
+            Cache::rm($key);
         }
         // 执行操作
         return $this->execute($sql, $this->getBind());
