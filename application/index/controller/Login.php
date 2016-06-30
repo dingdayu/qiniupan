@@ -53,6 +53,6 @@ class Login extends Controller
     public function quit()
     {
         session(null);
-        $this->success('ÍË³ö³É¹¦');
+        $this->success('é€€å‡ºæˆåŠŸ');
     }
 }

@@ -13,7 +13,14 @@ y一款基于七牛云的个人云盘：
 ~~~
 composer create-project dingdayu/qiniupan qiniupan dev-master --prefer-dist
 ~~~
-> 因为目前 ThinkPHP 5 正处于高速发展阶段，所以目前只能通过 dev-master 分支来初始化项目
+
+> 项目安装完成后，你必须配置数据库和七牛秘钥才能使用
+
+## 定时任务
+
+定时任务用于从七牛获取最新的文件列表。
+
+1. 你应该将：http://host/index/Crontab 加入网站监控或者定时任务
 
 ## 参与开发
 注册并登录 Github 帐号， fork 本项目并进行改动。
