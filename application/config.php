@@ -217,8 +217,8 @@ return [
     ],
 
     'qiniu'     => [
-        'accessKey' => "ScLfBuX6OeDNb0lVvk5qrCbgEjneoDpgvR9GfAun",
-        'secretKey' => "lcfLxYhNBi2wrbctTCtv4l46m77kLUgVAlcjWGbo",
-        'bucket' => "qzonebackgroundmusic",
+        'accessKey' => "",
+        'secretKey' => "",
+        'bucket' => "",
     ]
 ];
