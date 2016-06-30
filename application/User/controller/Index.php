@@ -99,6 +99,10 @@ class Index extends Common
                 'mimeType' => $v['mimeType'], 'fsize' => $v['fsize']
             ];
             $temp_arr['icon'] = $this->getIcon($v['name']);
+            $temp_url = config('qiniu.domain');
+            $temp_url .= (empty($v['dir'])) ? : $v['dir'];
+            $temp_url .= (empty($v['name'])) ? : '/'.$v['name'];
+            $temp_arr['url'] = $temp_url;
             $temp[] = $temp_arr;
         }
         return $temp;
