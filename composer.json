@@ -1,18 +1,17 @@
 {
-    "name": "topthink/think",
-    "description": "the new thinkphp framework",
+    "name": "dingdayu/qiniupan",
+    "description": "qiniu cloud",
     "type": "project",
     "keywords": [
-        "framework",
-        "thinkphp",
-        "ORM"
+        "qiniu",
+        "cloud"
     ],
-    "homepage": "http://thinkphp.cn/",
+    "homepage": "http://dingxiaoyu.cn/",
     "license": "Apache-2.0",
     "authors": [
         {
-            "name": "liu21st",
-            "email": "liu21st@gmail.com"
+            "name": "dingdayu",
+            "email": "614422099@qq.com"
         }
     ],
     "require": {
