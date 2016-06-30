@@ -11,7 +11,7 @@ y一款基于七牛云的个人云盘：
 
 ## 使用 Composer 安装 ThinkPHP5
 ~~~
-composer create-project topthink/think tp5 dev-master --prefer-dist
+composer create-project dingdayu/qiniupan qiniupan dev-master --prefer-dist
 ~~~
 > 因为目前 ThinkPHP 5 正处于高速发展阶段，所以目前只能通过 dev-master 分支来初始化项目
 
