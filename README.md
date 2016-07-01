@@ -9,12 +9,12 @@ y一款基于七牛云的个人云盘：
 
 详细开发文档参考 [ThinkPHP5完全开发手册](http://www.kancloud.cn/manual/thinkphp5)
 
-## 使用 Composer 安装 ThinkPHP5
+## 使用 Composer 安装
 ~~~
 composer create-project dingdayu/qiniupan qiniupan dev-master --prefer-dist
 ~~~
 
-> 项目安装完成后，你必须配置数据库和七牛秘钥才能使用
+> 项目安装完成后，你必须配置数据库和七牛秘钥才能使用 *请参阅下面的[安装配置](#安装配置)*
 
 ## 安装配置
 1. 配置数据库配置 `/application/database.php` 的 数据库部分
