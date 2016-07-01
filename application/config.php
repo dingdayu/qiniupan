@@ -216,9 +216,13 @@ return [
         'list_rows' => 15,
     ],
 
+    // 七牛配置
     'qiniu'     => [
         'accessKey' => "",
         'secretKey' => "",
         'bucket' => "",
-    ]
+        'domain' => "",
+    ],
+
+    'passwd_salt' => 'dingdayu',
 ];
