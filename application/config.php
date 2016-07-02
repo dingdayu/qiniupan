@@ -219,10 +219,10 @@ return [
 
     // 七牛配置
     'qiniu'     => [
-        'accessKey' => "",
-        'secretKey' => "",
-        'bucket' => "",
-        'domain' => "",
+        'accessKey' => "vJ9yOWS-rPczzrCB0p9xy6VsWmTgg4PwF1zwpv2J",
+        'secretKey' => "zQzt_nUlyxZxU2tudm4gfzm52EWvogngZF_-0EQb",
+        'bucket' => "qzonebackgroundmusic",
+        'domain' => "qzonebackgroundmusic.qiniudn.com",
     ],
 
     'passwd_salt' => 'dingdayu',

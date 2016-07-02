@@ -53,7 +53,7 @@
         <div class="am-offcanvas-bar admin-offcanvas-bar">
             <ul class="am-list admin-sidebar-list">
                 <li><a href="admin-index.html"><span class="am-icon-home"></span> 首页</a></li>
-                <li><a href="#"><span class="am-icon-sign-out"></span> 注销</a></li>
+                <li><a href="#" data-am-modal="{target: '#doc-modal-2', closeViaDimmer: 0, width: 400, height: 225}" onclick="updateList()"><span class="am-icon-sign-out"></span> 更新列表</a></li>
             </ul>
 
             <div class="am-panel am-panel-default admin-sidebar-panel">
@@ -96,7 +96,7 @@
                         <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
                     </div>
                     <div class="am-modal-bd">
-                        Modal 内容。本 Modal 无法通过遮罩层关闭。
+                        请在上传文件时不要进行其他操作。
                     </div>
                 </div>
             </div>
@@ -198,6 +198,23 @@
     }
 </script>
 
+<div class="am-modal am-modal-no-btn" tabindex="-1" id="doc-modal-2">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">列表更新中</div>
+        <div class="am-modal-bd">
+            列表正在更新请等待弹窗自动关闭。
+        </div>
+    </div>
+</div>
+<script type="application/javascript">
+    function updateList() {
+        $.get("{:url('/index/Crontab')}",function(data,status){
+            alert('更新成功' );
+            var $modal2 = $('#doc-modal-2');
+            $modal2.modal('close');
+        });
+    }
+</script>
 
 <script src="__STATIC__/plupload/js/plupload.full.min.js"></script>
 <script src="__STATIC__/qiniu/dist/qiniu.min.js"></script>

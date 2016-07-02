@@ -80,12 +80,13 @@ var uploader = Qiniu.uploader({
             // 该配置必须要在unique_names: false，save_key: false时才生效
             // console.log(up);
             // console.log(file);
-            var key = Location + file.name;
+            var key = Location + '/' + file.name;
 
             if (key.substr(0,1)=='/') key = key.substr(1);
             // var reg = /\/$/gi;
             // str=str.replace(reg,"");
             // do something with key here
+            console.log(key);
             return key
         }
     }
