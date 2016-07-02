@@ -76,10 +76,16 @@
     <!-- content start -->
     <div class="admin-content">
 
-        <div class="admin-content-body">
+        <div class="admin-content-body" id="container">
             <div class="am-cf am-padding am-padding-bottom-0">
                 <div class="am-fl am-cf" id="dir">
                     <strong class="am-text-primary am-text-lg">相册</strong> / <small>Gallery</small>
+                </div>
+            </div>
+
+            <div class="am-cf am-padding am-padding-bottom-0">
+                <div class="am-fl am-cf" id="update">
+                    <button type="button" id="pickfiles" class="am-btn am-btn-primary">上传文件</button>
                 </div>
             </div>
 
@@ -128,10 +134,14 @@
 <!--<![endif]-->
 <script src="__AMAZE__/js/amazeui.min.js"></script>
 <script src="__AMAZE__/js/app.js"></script>
+
+
 <script type="application/javascript">
+    var Location = '/';
+    var domain = '{:config("qiniu.domain")}';
 
     $(function(){
-        getFiles('/');
+        getFiles(Location);
     });
 
     function getFiles(dir){
@@ -139,6 +149,8 @@
             if(data.code = 200){
                 initView(data.data);
                 initDir(data.dir);
+                Location = data.dir;
+                //console.log(Location);
             }
         },'json');
     }
@@ -146,7 +158,7 @@
     function initView(data){
         var html = '';
         for(var item in data) {
-            console.log(data[item]);
+            //console.log(data[item]);
             html += '<li><a href="#"><img class="am-img-thumbnail am-img-bdrs" src="'+ data[item].icon +'" alt="" data-key="'+data[item].name +'"';
             if(data[item].mimeType == 'directory'){
                 html += 'onclick="getFiles(\''+ data[item].name +'\')"';
@@ -157,7 +169,7 @@
     }
 
     function initDir(dir){
-        if('' == dir){
+        if('/' == dir){
             $('#dir strong').text('首页');
             $('#dir small').text('/');
         } else {
@@ -173,5 +185,10 @@
 
     }
 </script>
+
+
+<script src="__STATIC__/plupload/js/plupload.full.min.js"></script>
+<script src="__STATIC__/qiniu/dist/qiniu.min.js"></script>
+<script src="__STATIC__/project/qiniu-upload.js"></script>
 </body>
 </html>

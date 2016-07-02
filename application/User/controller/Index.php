@@ -1,15 +1,33 @@
 <?php
 namespace app\user\controller;
 
+use Qiniu\Auth;
+use Qiniu\Storage\BucketManager;
 use think\Db;
 
 class Index extends Common
 {
-    private $HOST = 'http://qzonebackgroundmusic.qiniudn.com/';
     public function index()
     {
         $template = [];
         return view('',$template);
+    }
+
+    public function uptoken()
+    {
+        $accessKey = config('qiniu.accessKey');
+        $secretKey = config('qiniu.secretKey');
+        $auth = new Auth($accessKey, $secretKey);
+        $bucket = config('qiniu.bucket');
+        // 上传文件到七牛后， 七牛将文件名和文件大小回调给业务服务器
+
+//        $policy = array(
+//            'callbackUrl' => 'http://your.domain.com/callback.php',
+//            'callbackBody' => 'filename=$(fname)&filesize=$(fsize)'
+//        );
+        $uptoken = $auth->uploadToken($bucket);
+
+        return json(['uptoken'=>$uptoken]);
     }
 
     /**
@@ -56,15 +74,16 @@ class Index extends Common
     /**
      * 获取文件类型的预览图标链接
      * @param $file string 文件名
+     * @param $fileUrl string 七牛文件地址
      * @return string Url链接
      */
-    private function getIcon($file)
+    private function getIcon($file, $fileUrl = '')
     {
         $ext = $this->getExt($file);
         $ext = strtolower($ext);
         switch ($ext) {
             case 'jpg':
-                $ext_ret = $this->HOST . $file;
+                $ext_ret = $fileUrl;
                 break;
             default :
                 $ext_ret = '/static/images/ext/'.$ext.'.png';
@@ -98,11 +117,13 @@ class Index extends Common
             $temp_arr = ['name' => trim($v['name'],'/'), 'last_time' => date('Y-m-d H:i:s',$v['putTime']),
                 'mimeType' => $v['mimeType'], 'fsize' => $v['fsize']
             ];
-            $temp_arr['icon'] = $this->getIcon($v['name']);
-            $temp_url = config('qiniu.domain');
+
+            $temp_url = 'http://' . config('qiniu.domain');
             $temp_url .= (empty($v['dir'])) ? : $v['dir'];
             $temp_url .= (empty($v['name'])) ? : '/'.$v['name'];
             $temp_arr['url'] = $temp_url;
+
+            $temp_arr['icon'] = $this->getIcon($v['name'], $temp_url);
             $temp[] = $temp_arr;
         }
         return $temp;
