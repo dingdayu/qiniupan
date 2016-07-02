@@ -24,7 +24,10 @@ composer create-project dingdayu/qiniupan qiniupan dev-master --prefer-dist
 ```
 INSERT INTO `tp_user` VALUES ('1', 'admin', '01ef709fae3a78065217d9431f726d2c', '614422099@qq.com', '1467342696', '127.0.0.1', '0', '127.0.0.1', 'init');
 ```
+> 这里的默认管理员：`admin` 密码：`123456`
 5. 循环请求 `http://host/index/Crontab` 从七牛服务器获取文件列表[建议添加进定时任务]
+
+
 
 ## 定时任务
 
