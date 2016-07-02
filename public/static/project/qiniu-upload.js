@@ -66,6 +66,8 @@ var uploader = Qiniu.uploader({
             // var sourceLink = domain + res.key; 获取上传成功后的文件的Url
             // console.log(file);
             // console.log(up);
+            var $modal = $('#doc-modal-1');
+            $modal.modal('close');
         },
         'Error': function(up, err, errTip) {
             //上传出错时，处理相关的事情

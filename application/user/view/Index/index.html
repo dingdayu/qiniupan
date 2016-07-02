@@ -85,7 +85,19 @@
 
             <div class="am-cf am-padding am-padding-bottom-0">
                 <div class="am-fl am-cf" id="update">
-                    <button type="button" id="pickfiles" class="am-btn am-btn-primary">上传文件</button>
+                    <button type="button" id="pickfiles" class="am-btn am-btn-primary" data-am-modal="{target: '#doc-modal-1', closeViaDimmer: 0, width: 400, height: 225}">上传文件</button>
+                </div>
+            </div>
+
+
+            <div class="am-modal am-modal-no-btn" tabindex="-1" id="doc-modal-1">
+                <div class="am-modal-dialog">
+                    <div class="am-modal-hd">文件上传中
+                        <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
+                    </div>
+                    <div class="am-modal-bd">
+                        Modal 内容。本 Modal 无法通过遮罩层关闭。
+                    </div>
                 </div>
             </div>
 
